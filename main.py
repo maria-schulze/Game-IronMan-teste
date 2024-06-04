@@ -2,24 +2,31 @@ import pygame
 import random
 import os
 pygame.init()
-tamanho = (800,600)
+
 relogio = pygame.time.Clock()
-tela = pygame.display.set_mode( tamanho ) 
-pygame.display.set_caption("Iron Man")
 icone  = pygame.image.load("assets/icone.png")
-pygame.display.set_icon(icone)
-branco = (255,255,255)
-preto = (0, 0 ,0 )
 iron = pygame.image.load("assets/iron.png")
 fundo = pygame.image.load("assets/fundo.png")
+fundoStart = pygame.image.load("assets/fundoStart.png")
+fundoDead = pygame.image.load("assets/fundoDead.png")
 missel = pygame.image.load("assets/missile.png")
+tamanho = (800,600)
+tela = pygame.display.set_mode( tamanho ) 
+pygame.display.set_caption("Iron Man")
+pygame.display.set_icon(icone)
 missileSound = pygame.mixer.Sound("assets/missile.wav")
 explosaoSound = pygame.mixer.Sound("assets/explosao.wav")
-pygame.mixer.Sound.play(missileSound)
 fonte = pygame.font.SysFont("comicsans",28)
+fonteStart = pygame.font.SysFont("comicsans",55)
 fonteMorte = pygame.font.SysFont("arial",120)
+pygame.mixer.music.load("assets/ironsound.mp3")
+
+branco = (255,255,255)
+preto = (0, 0 ,0 )
 
 def jogar():
+    pygame.mixer.Sound.play(missileSound)
+    pygame.mixer.music.play(-1)
     posicaoXPersona = 400
     posicaoYPersona = 300
     movimentoXPersona  = 0
@@ -27,15 +34,13 @@ def jogar():
     posicaoXMissel = 400
     posicaoYMissel = -240
     velocidadeMissel = 1
-    pygame.mixer.Sound.play(missileSound)
-    pygame.mixer.music.load("assets/ironsound.mp3")
-    pygame.mixer.music.play(-1)
     pontos = 0
     larguraPersona = 250
     alturaPersona = 127
     larguaMissel  = 50
     alturaMissel  = 250
-    dificuldade  = -20
+    dificuldade  = 20
+
     while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -95,24 +100,62 @@ def jogar():
         pixelsMisselX = list(range(posicaoXMissel, posicaoXMissel + larguaMissel))
         pixelsMisselY = list(range(posicaoYMissel, posicaoYMissel + alturaMissel))
         
-        os.system("cls")
-        print( len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )   )
+        #print( len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )   )
         if  len( list( set(pixelsMisselY).intersection(set(pixelsPersonaY))) ) > dificuldade:
             if len( list( set(pixelsMisselX).intersection(set(pixelsPersonaX))   ) )  > dificuldade:
-                print("Morreuuuuu")
-                textoMorte = fonteMorte.render("Morreuuuu", True, preto)
-                tela.blit(textoMorte, (200,300))
-                pygame.mixer.Sound.play(explosaoSound)
-
-            else:
-                print("Ainda Vivo, mas por pouco!")
-        else:
-            print("Ainda Vivo")
-        
+                dead()
         
     
         
         pygame.display.update()
         relogio.tick(60)
 
-jogar()
+
+def dead():
+    pygame.mixer.music.stop()
+    pygame.mixer.Sound.play(explosaoSound)
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                quit()
+            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN:
+                jogar()
+
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                if buttonStart.collidepoint(evento.pos):
+                    jogar()
+
+        tela.fill(branco)
+        tela.blit(fundoDead, (0,0))
+        buttonStart = pygame.draw.rect(tela, preto, (35,482,750,100),0)
+        textoStart = fonteStart.render("RESTART", True, branco)
+        tela.blit(textoStart, (400,482))
+        textoEnter = fonte.render("Press enter to continue...", True, branco)
+        tela.blit(textoEnter, (60,482))
+      
+        
+        pygame.display.update()
+        relogio.tick(60)
+
+
+def start():
+    while True:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                quit()
+            elif evento.type == pygame.MOUSEBUTTONDOWN:
+                if buttonStart.collidepoint(evento.pos):
+                    jogar()
+
+        tela.fill(branco)
+        tela.blit(fundoStart, (0,0))
+        buttonStart = pygame.draw.rect(tela, preto, (35,482,750,100),0)
+        textoStart = fonteStart.render("START", True, branco)
+        tela.blit(textoStart, (330,482))
+
+        
+        
+        pygame.display.update()
+        relogio.tick(60)
+
+start()
